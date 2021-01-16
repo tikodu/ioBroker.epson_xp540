@@ -1,0 +1,94 @@
+{
+	"common": {
+		"name": "epson_xp540",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "Epson XP-540",
+		"titleLang": {
+			"en": "Epson XP-540",
+			"de": "Epson XP-540",
+			"ru": "Epson XP-540",
+			"pt": "Epson XP-540",
+			"nl": "Epson XP-540",
+			"fr": "Epson XP-540",
+			"it": "Epson XP-540",
+			"es": "Epson XP-540",
+			"pl": "Epson XP-540",
+			"zh-cn": "爱普生XP-540"
+		},
+		"desc": {
+			"en": "Periodically retrieves the status information and cartridge level of an EPSON XP-540 printer",
+			"de": "Ruft regelmäßig die Statusinformationen und den Patronenstand eines EPSON XP-540-Druckers ab",
+			"ru": "Периодически запрашивает информацию о состоянии и уровне картриджей принтера EPSON XP-540.",
+			"pt": "Recupera periodicamente as informações de status e o nível do cartucho de uma impressora EPSON XP-540",
+			"nl": "Haalt regelmatig de statusinformatie en het cartridgeniveau van een EPSON XP-540-printer op",
+			"fr": "Récupère régulièrement les informations d'état et le niveau de cartouche d'une imprimante EPSON XP-540",
+			"it": "Recupera periodicamente le informazioni sullo stato e il livello della cartuccia di una stampante EPSON XP-540",
+			"es": "Recupera periódicamente la información de estado y el nivel del cartucho de una impresora EPSON XP-540",
+			"pl": "Okresowo pobiera informacje o stanie i poziomie wkładu drukarki EPSON XP-540",
+			"zh-cn": "定期检索EPSON XP-540打印机的状态信息和墨盒级别"
+		},
+		"authors": ["tikodu <till@dusoft.de>"],
+		"keywords": ["epson", "printer", "xp-540", "ink"],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "build/main.js",
+		"icon": "epson_xp540.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/tikodu/ioBroker.epson_xp540/master/admin/epson_xp540.png",
+		"readme": "https://github.com/tikodu/ioBroker.epson_xp540/blob/master/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "infrastructure",
+		"compact": true,
+		"connectionType": "local",
+		"dataSource": "poll",
+		"materialize": true,
+		"dependencies": [
+			{
+				"js-controller": ">=2.0.0"
+			}
+		]
+	},
+	"native": {
+		"option1": true,
+		"option2": "42"
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}
