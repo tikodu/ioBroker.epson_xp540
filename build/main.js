@@ -43,20 +43,7 @@ class EpsonXp540 extends utils.Adapter {
         if (this.config.internvalInMinutes >= 1 && this.config.internvalInMinutes <= 60) {
             intervalInMinutes = this.config.internvalInMinutes;
         }
-        this.log.info('update internval is ' + intervalInMinutes + ' minute(s).');
-        await this.setObjectNotExistsAsync('info.updateInterval', {
-            type: 'state',
-            common: {
-                name: 'Update interval in minutes',
-                type: 'number',
-                role: 'value',
-                unit: 'minutes',
-                read: true,
-                write: false,
-            },
-            native: {},
-        });
-        this.log.info('Init periodic update...');
+        this.log.info('Init periodic update: every ' + intervalInMinutes + ' minutes(s).');
         this._periodicUpdate = setInterval(this.fetchAllInformation, intervalInMinutes * 1000 * 60);
         this.fetchAllInformation();
         this.log.info('Adapter initialized.');
@@ -78,6 +65,18 @@ class EpsonXp540 extends utils.Adapter {
     replaceAll(base, search, replace) {
         return base.split(search).join(replace);
     }
+    transformToValidKeyForIobroker(key) {
+        let transformedKey = key.toLowerCase();
+        transformedKey = this.replaceAll(transformedKey, ' ', '_');
+        transformedKey = this.replaceAll(transformedKey, '-', '_');
+        transformedKey = this.replaceAll(transformedKey, '.', '_');
+        transformedKey = this.replaceAll(transformedKey, ':', '_');
+        transformedKey = this.replaceAll(transformedKey, 'ä', 'ae');
+        transformedKey = this.replaceAll(transformedKey, 'ö', 'oe');
+        transformedKey = this.replaceAll(transformedKey, 'ü', 'ue');
+        transformedKey = this.replaceAll(transformedKey, 'ß', 'ss');
+        return transformedKey;
+    }
     async updatePrinterInfo(html) {
         this.log.info('update printer info');
         const matchKeys = html.match(/<td\s+class="item-key"><bdi>[\S\s]*?<\/bdi>/gi);
@@ -85,16 +84,8 @@ class EpsonXp540 extends utils.Adapter {
         if (matchKeys && matchValues && matchKeys.length === matchValues.length) {
             for (let i = 0; i < matchKeys.length; i++) {
                 const originalKey = matchKeys[i].replace(/(<\/?[^>]+>)/gi, '');
+                const key = this.transformToValidKeyForIobroker(originalKey);
                 const value = matchValues[i].replace(/(<\/?[^>]+>)/gi, '');
-                let key = originalKey.toLowerCase();
-                key = this.replaceAll(key, ' ', '_');
-                key = this.replaceAll(key, '-', '_');
-                key = this.replaceAll(key, '.', '_');
-                key = this.replaceAll(key, ':', '_');
-                key = this.replaceAll(key, 'ä', 'ae');
-                key = this.replaceAll(key, 'ö', 'oe');
-                key = this.replaceAll(key, 'ü', 'ue');
-                key = this.replaceAll(key, 'ß', 'ss');
                 await this.setObjectNotExistsAsync(`printer.${key}`, {
                     type: 'state',
                     common: {
@@ -116,13 +107,8 @@ class EpsonXp540 extends utils.Adapter {
         const matchValues = html.match(/.PNG'\s+height='(.*?)'\s+style=''>/g);
         if (matchKeys && matchValues && matchKeys.length === matchValues.length) {
             for (let i = 0; i < matchKeys.length; i++) {
-                let key = matchKeys[i];
-                key = key.replace("<div class='clrname'>", '');
-                key = key.replace('<', '');
-                key = key.toLowerCase();
-                let value = matchValues[i];
-                value = value.replace(".PNG' height='", '');
-                value = value.replace("' style=''>", '');
+                const key = matchKeys[i].replace("<div class='clrname'>", '').replace('<', '').toLowerCase();
+                const value = matchValues[i].replace(".PNG' height='", '').replace("' style=''>", '');
                 const level = (parseInt(value, 10) * 100) / 50;
                 await this.setObjectNotExistsAsync(`ink.${key}`, {
                     type: 'state',
