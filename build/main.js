@@ -22,11 +22,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
 const utils = __importStar(require("@iobroker/adapter-core"));
-// Load your modules here, e.g.:
-// import * as fs from "fs";
+const fetch = __importStar(require("node-fetch"));
 class EpsonXp540 extends utils.Adapter {
     constructor(options = {}) {
         super({
@@ -34,102 +31,139 @@ class EpsonXp540 extends utils.Adapter {
             name: 'epson_xp540',
         });
         this.on('ready', this.onReady.bind(this));
-        this.on('stateChange', this.onStateChange.bind(this));
-        // this.on('objectChange', this.onObjectChange.bind(this));
-        // this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
     }
     /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
-        // Initialize your adapter here
-        // Reset the connection indicator during startup
+        this.log.info('Adapter starting.');
         this.setState('info.connection', false, true);
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
-        await this.setObjectNotExistsAsync('testVariable', {
+        let intervalInMinutes = 5;
+        if (this.config.internvalInMinutes >= 1 && this.config.internvalInMinutes <= 60) {
+            intervalInMinutes = this.config.internvalInMinutes;
+        }
+        this.log.info('update internval is ' + intervalInMinutes + ' minute(s).');
+        await this.setObjectNotExistsAsync('info.updateInterval', {
             type: 'state',
             common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
+                name: 'Update interval in minutes',
+                type: 'number',
+                role: 'value',
+                unit: 'minutes',
                 read: true,
-                write: true,
+                write: false,
             },
             native: {},
         });
-        // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
-        // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-        // this.subscribeStates('lights.*');
-        // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-        // this.subscribeStates('*');
-        /*
-            setState examples
-            you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+        this.log.info('Init periodic update...');
+        this._periodicUpdate = setInterval(this.fetchAllInformation, intervalInMinutes * 1000 * 60);
+        this.fetchAllInformation();
+        this.log.info('Adapter initialized.');
     }
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      */
     onUnload(callback) {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
+            if (this._periodicUpdate) {
+                clearInterval(this._periodicUpdate);
+            }
             callback();
         }
         catch (e) {
             callback();
         }
     }
-    // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-    // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-    // /**
-    //  * Is called if a subscribed object changes
-    //  */
-    // private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-    // 	if (obj) {
-    // 		// The object was changed
-    // 		this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-    // 	} else {
-    // 		// The object was deleted
-    // 		this.log.info(`object ${id} deleted`);
-    // 	}
-    // }
-    /**
-     * Is called if a subscribed state changes
-     */
-    onStateChange(id, state) {
-        if (state) {
-            // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+    replaceAll(base, search, replace) {
+        return base.split(search).join(replace);
+    }
+    async updatePrinterInfo(html) {
+        this.log.info('update printer info');
+        const matchKeys = html.match(/<td\s+class="item-key"><bdi>[\S\s]*?<\/bdi>/gi);
+        const matchValues = html.match(/<td\s+class="item-value">[\S\s]*?<\/td>/gi);
+        if (matchKeys && matchValues && matchKeys.length === matchValues.length) {
+            for (let i = 0; i < matchKeys.length; i++) {
+                const originalKey = matchKeys[i].replace(/(<\/?[^>]+>)/gi, '');
+                const value = matchValues[i].replace(/(<\/?[^>]+>)/gi, '');
+                let key = originalKey.toLowerCase();
+                key = this.replaceAll(key, ' ', '_');
+                key = this.replaceAll(key, '-', '_');
+                key = this.replaceAll(key, '.', '_');
+                key = this.replaceAll(key, ':', '_');
+                key = this.replaceAll(key, 'ä', 'ae');
+                key = this.replaceAll(key, 'ö', 'oe');
+                key = this.replaceAll(key, 'ü', 'ue');
+                key = this.replaceAll(key, 'ß', 'ss');
+                await this.setObjectNotExistsAsync(`printer.${key}`, {
+                    type: 'state',
+                    common: {
+                        name: `${originalKey}`,
+                        type: 'string',
+                        role: 'value',
+                        read: true,
+                        write: false,
+                    },
+                    native: {},
+                });
+                await this.setStateAsync(`printer.${key}`, value, true);
+            }
         }
-        else {
-            // The state was deleted
-            this.log.info(`state ${id} deleted`);
+    }
+    async updateInkCartridgeInfo(html) {
+        this.log.info('update ink cartridge info');
+        const matchKeys = html.match(/<div\s+class='clrname'>(.*?)</g);
+        const matchValues = html.match(/.PNG'\s+height='(.*?)'\s+style=''>/g);
+        if (matchKeys && matchValues && matchKeys.length === matchValues.length) {
+            for (let i = 0; i < matchKeys.length; i++) {
+                let key = matchKeys[i];
+                key = key.replace("<div class='clrname'>", '');
+                key = key.replace('<', '');
+                key = key.toLowerCase();
+                let value = matchValues[i];
+                value = value.replace(".PNG' height='", '');
+                value = value.replace("' style=''>", '');
+                const level = (parseInt(value, 10) * 100) / 50;
+                await this.setObjectNotExistsAsync(`ink.${key}`, {
+                    type: 'state',
+                    common: {
+                        name: `${key.toUpperCase()}`,
+                        type: 'number',
+                        role: 'value',
+                        unit: '%',
+                        read: true,
+                        write: false,
+                    },
+                    native: {},
+                });
+                await this.setStateAsync(`ink.${key}`, level, true);
+            }
+        }
+    }
+    fetchAllInformation() {
+        this.log.info('updating infos...');
+        try {
+            const url = `http://${this.config.ip}/PRESENTATION/HTML/TOP/PRTINFO.HTML`;
+            fetch
+                .default(url)
+                .then((res) => {
+                if (res.ok) {
+                    return res.text();
+                }
+                else {
+                    throw Error(res.statusText);
+                }
+            })
+                .then(async (htmlBody) => {
+                await this.updatePrinterInfo(htmlBody);
+                await this.updateInkCartridgeInfo(htmlBody);
+                await this.setStateAsync('info.connection', true, true);
+                this.log.info('updating infos successfull');
+            });
+        }
+        catch (e) {
+            this.setState('info.connection', false, true);
+            this.log.error(e);
         }
     }
 }
