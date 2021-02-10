@@ -1,6 +1,6 @@
 {
   "name": "iobroker.epson_xp540",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Periodically retrieves the status information and ink cartridge level of an EPSON XP-540 printer",
   "author": {
     "name": "tikodu",
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:tikodu/ioBroker.epson_xp540.git"
+    "url": "https://github.com/tikodu/ioBroker.epson_xp540.git"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.4.0",

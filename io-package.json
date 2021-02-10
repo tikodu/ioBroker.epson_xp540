@@ -1,11 +1,31 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"news": {
+			"1.0.1": {
+				"en": "added support for further languages",
+				"de": "Unterstützung für weitere Sprachen hinzugefügt",
+				"ru": "добавлена поддержка других языков",
+				"pt": "adicionado suporte para outros idiomas",
+				"nl": "ondersteuning toegevoegd voor andere talen",
+				"fr": "prise en charge supplémentaire pour d'autres langues",
+				"it": "aggiunto il supporto per altre lingue",
+				"es": "soporte agregado para otros idiomas",
+				"pl": "dodano obsługę innych języków",
+				"zh-cn": "增加了对其他语言的支持"
+			},
 			"1.0.0": {
 				"en": "initial release",
-				"de": "Erstveröffentlichung"
+				"de": "Erstveröffentlichung",
+				"ru": "изначальный выпуск",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "初始发行"
 			}
 		},
 		"title": "Epson XP-540",
@@ -40,8 +60,8 @@
 		]
 	},
 	"native": {
-		"option1": true,
-		"option2": "42"
+		"ip": "",
+		"internvalInMinutes": "5"
 	},
 	"objects": [],
 	"instanceObjects": [
