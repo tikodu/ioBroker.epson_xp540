@@ -31,7 +31,7 @@ class EpsonXp540 extends utils.Adapter {
             name: 'epson_xp540',
         });
         this.on('ready', this.onReady.bind(this));
-        this.on('unload', this.onUnload.bind(this));
+        //this.on('unload', this.onUnload.bind(this));
     }
     /**
      * Is called when databases are connected and adapter received configuration.
@@ -60,7 +60,13 @@ class EpsonXp540 extends utils.Adapter {
                 });
             }
             catch (e) {
-                this.log.error(e);
+                this.log.error(JSON.stringify(e));
+                if (this.supportsFeature && this.supportsFeature('PLUGINS')) {
+                    const sentryInstance = this.getPluginInstance('sentry');
+                    if (sentryInstance) {
+                        sentryInstance.getSentryObject().captureException(e);
+                    }
+                }
                 this.terminateWithMessage('An error occurred while retrieving or handling the data.');
             }
         }
@@ -69,19 +75,18 @@ class EpsonXp540 extends utils.Adapter {
         }
     }
     terminateWithMessage(message) {
-        this.terminate(message + ' Adapter stopped until next schedule moment.');
+        this.terminate ? this.terminate(message + ' Adapter stopped until next schedule moment.', 0) : process.exit();
     }
-    /**
-     * Is called when adapter shuts down - callback has to be called under any circumstances!
-     */
-    onUnload(callback) {
-        try {
-            callback();
-        }
-        catch (e) {
-            callback();
-        }
-    }
+    // /**
+    //  * Is called when adapter shuts down - callback has to be called under any circumstances!
+    //  */
+    // private onUnload(callback: () => void): void {
+    // 	try {
+    // 		callback();
+    // 	} catch (e) {
+    // 		callback();
+    // 	}
+    // }
     replaceAll(base, search, replace) {
         return base.split(search).join(replace);
     }
