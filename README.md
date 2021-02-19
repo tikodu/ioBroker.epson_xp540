@@ -19,6 +19,10 @@ Periodically retrieves the status information and cartridge level of an EPSON XP
 
 ## Changelog
 
+### 1.0.3 (2021-02-19)
+
+-   (tikodu) bug fix
+
 ### 1.0.2 (2021-02-19)
 
 -   (tikodu) changed adapter mode to schedule

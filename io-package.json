@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.2",
+		"version": "1.0.3",
 		"news": {
+			"1.0.3": {
+				"en": "Bug fix",
+				"de": "Fehlerbehebung",
+				"ru": "Исправлена ошибка",
+				"pt": "Correção de bug",
+				"nl": "Bugfix",
+				"fr": "Correction d'un bug",
+				"it": "Risoluzione del problema",
+				"es": "Arreglo del fallo",
+				"pl": "Naprawa błędów",
+				"zh-cn": "错误修复"
+			},
 			"1.0.2": {
 				"en": "changed adapter mode to schedule",
 				"de": "Adaptermodus auf Zeitplan geändert",
