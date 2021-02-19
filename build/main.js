@@ -31,6 +31,7 @@ class EpsonXp540 extends utils.Adapter {
             name: 'epson_xp540',
         });
         this.on('ready', this.onReady.bind(this));
+        this.on('unload', this.onUnload.bind(this));
     }
     /**
      * Is called when databases are connected and adapter received configuration.
@@ -70,12 +71,26 @@ class EpsonXp540 extends utils.Adapter {
             this.stopWithTimeout(true);
         }
     }
+    /**
+     * Is called when adapter shuts down - callback has to be called under any circumstances!
+     */
+    onUnload(callback) {
+        try {
+            if (this._timeout) {
+                clearTimeout(this._timeout);
+            }
+            callback();
+        }
+        catch (e) {
+            callback();
+        }
+    }
     stopWithTimeout(withError = false) {
-        setTimeout(() => {
+        this._timeout = setTimeout(() => {
             this.terminate
                 ? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
                 : process.exit(0);
-        }, 1000 * 50);
+        }, 1000 * 10);
     }
     replaceAll(base, search, replace) {
         return base.split(search).join(replace);

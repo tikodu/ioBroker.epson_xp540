@@ -6,12 +6,15 @@ import * as utils from '@iobroker/adapter-core';
 import * as fetch from 'node-fetch';
 
 class EpsonXp540 extends utils.Adapter {
+	private _timeout: NodeJS.Timeout | undefined;
+
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
 			...options,
 			name: 'epson_xp540',
 		});
 		this.on('ready', this.onReady.bind(this));
+		this.on('unload', this.onUnload.bind(this));
 	}
 
 	/**
@@ -49,12 +52,26 @@ class EpsonXp540 extends utils.Adapter {
 		}
 	}
 
+	/**
+	 * Is called when adapter shuts down - callback has to be called under any circumstances!
+	 */
+	private onUnload(callback: () => void): void {
+		try {
+			if (this._timeout) {
+				clearTimeout(this._timeout);
+			}
+			callback();
+		} catch (e) {
+			callback();
+		}
+	}
+
 	private stopWithTimeout(withError = false): void {
-		setTimeout(() => {
+		this._timeout = setTimeout(() => {
 			this.terminate
 				? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
 				: process.exit(0);
-		}, 1000 * 20);
+		}, 1000 * 10);
 	}
 
 	private replaceAll(base: string, search: string, replace: string): string {
