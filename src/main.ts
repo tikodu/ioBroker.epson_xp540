@@ -54,7 +54,7 @@ class EpsonXp540 extends utils.Adapter {
 			this.terminate
 				? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
 				: process.exit(0);
-		}, 1000 * 50);
+		}, 1000 * 20);
 	}
 
 	private replaceAll(base: string, search: string, replace: string): string {
