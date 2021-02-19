@@ -35,23 +35,26 @@ class EpsonXp540 extends utils.Adapter {
 						this.log.info('Data has been received. Try to handle data...');
 						await this.updatePrinterInfo(htmlBody);
 						await this.updateInkCartridgeInfo(htmlBody);
-						this.terminateWithMessage('All data handled.');
+						this.log.info('All data handled.');
+						this.stopWithTimeout();
 					});
 			} catch (e) {
+				this.log.info('An error occurred while retrieving or handling the data.');
 				this.log.error(JSON.stringify(e));
-				this.terminateWithMessage('An error occurred while retrieving or handling the data.');
+				this.stopWithTimeout(true);
 			}
 		} else {
-			this.terminateWithMessage('Data cannot be retrieved. Please configure a valid IP or hostname.');
+			this.log.warn('Data cannot be retrieved. Please configure a valid IP or hostname.');
+			this.stopWithTimeout(true);
 		}
 	}
 
-	private terminateWithMessage(message: string): void {
+	private stopWithTimeout(withError = false): void {
 		setTimeout(() => {
 			this.terminate
-				? this.terminate(message + ' Adapter stopped until next schedule moment.', 0)
-				: process.exit();
-		}, 1000);
+				? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
+				: process.exit(0);
+		}, 1000 * 50);
 	}
 
 	private replaceAll(base: string, search: string, replace: string): string {
