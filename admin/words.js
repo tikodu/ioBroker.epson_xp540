@@ -26,16 +26,4 @@ systemDictionary = {
 		pl: 'IP lub nazwa hosta',
 		'zh-cn': 'IP或主机名',
 	},
-	'Update interval in minutes (1 - 60)': {
-		en: 'Update interval in minutes (1 - 60)',
-		de: 'Aktualisierungsintervall in Minuten (1 - 60)',
-		ru: 'Интервал обновления в минутах (1-60)',
-		pt: 'Intervalo de atualização em minutos (1 - 60)',
-		nl: 'Update-interval in minuten (1-60)',
-		fr: 'Intervalle de mise à jour en minutes (1 - 60)',
-		it: 'Intervallo di aggiornamento in minuti (1 - 60)',
-		es: 'Intervalo de actualización en minutos (1 - 60)',
-		pl: 'Interwał aktualizacji w minutach (1 - 60)',
-		'zh-cn': '以分钟为单位的更新间隔（1-60）',
-	},
 };

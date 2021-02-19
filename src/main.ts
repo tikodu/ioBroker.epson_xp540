@@ -6,8 +6,6 @@ import * as utils from '@iobroker/adapter-core';
 import * as fetch from 'node-fetch';
 
 class EpsonXp540 extends utils.Adapter {
-	private _periodicUpdate: NodeJS.Timeout | undefined;
-
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
 			...options,
@@ -21,20 +19,36 @@ class EpsonXp540 extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	private async onReady(): Promise<void> {
-		this.log.info('Adapter starting.');
-
-		this.setState('info.connection', false, true);
-
-		let intervalInMinutes = 5;
-		if (this.config.internvalInMinutes >= 1 && this.config.internvalInMinutes <= 60) {
-			intervalInMinutes = this.config.internvalInMinutes;
+		this.log.info('Adapter started. Try to retrieve data...');
+		if (this.config?.ip !== null && this.config?.ip !== undefined && this.config.ip !== '') {
+			try {
+				const url = `http://${this.config.ip}/PRESENTATION/HTML/TOP/PRTINFO.HTML`;
+				fetch
+					.default(url)
+					.then((res) => {
+						if (res.ok) {
+							return res.text();
+						} else {
+							throw Error(res.statusText);
+						}
+					})
+					.then(async (htmlBody: string) => {
+						this.log.info('Data has been received. Try to handle data...');
+						await this.updatePrinterInfo(htmlBody);
+						await this.updateInkCartridgeInfo(htmlBody);
+						this.terminateWithMessage('All data handled.');
+					});
+			} catch (e) {
+				this.log.error(e);
+				this.terminateWithMessage('An error occurred while retrieving or handling the data.');
+			}
+		} else {
+			this.terminateWithMessage('Data cannot be retrieved. Please configure a valid IP or hostname.');
 		}
+	}
 
-		this.log.info('Init periodic update: every ' + intervalInMinutes + ' minutes(s).');
-		this._periodicUpdate = setInterval(this.fetchAllInformation, intervalInMinutes * 1000 * 60);
-		this.fetchAllInformation();
-
-		this.log.info('Adapter initialized.');
+	private terminateWithMessage(message: string): void {
+		this.terminate(message + ' Adapter stopped until next schedule moment.');
 	}
 
 	/**
@@ -42,9 +56,6 @@ class EpsonXp540 extends utils.Adapter {
 	 */
 	private onUnload(callback: () => void): void {
 		try {
-			if (this._periodicUpdate) {
-				clearInterval(this._periodicUpdate);
-			}
 			callback();
 		} catch (e) {
 			callback();
@@ -69,7 +80,7 @@ class EpsonXp540 extends utils.Adapter {
 	}
 
 	private async updatePrinterInfo(html: string): Promise<void> {
-		this.log.info('update printer info');
+		this.log.info('Updating printer info...');
 		const matchKeys = html.match(/<td\s+class="item-key"><bdi>[\S\s]*?<\/bdi>/gi);
 		const matchValues = html.match(/<td\s+class="item-value">[\S\s]*?<\/td>/gi);
 		if (matchKeys && matchValues && matchKeys.length === matchValues.length) {
@@ -95,7 +106,7 @@ class EpsonXp540 extends utils.Adapter {
 	}
 
 	private async updateInkCartridgeInfo(html: string): Promise<void> {
-		this.log.info('update ink cartridge info');
+		this.log.info('Updating ink cartridge info...');
 		const matchKeys = html.match(/<div\s+class='clrname'>(.*?)</g);
 		const matchValues = html.match(/.PNG'\s+height='(.*?)'\s+style=''>/g);
 
@@ -119,31 +130,6 @@ class EpsonXp540 extends utils.Adapter {
 				});
 				await this.setStateAsync(`ink.${key}`, level, true);
 			}
-		}
-	}
-
-	private fetchAllInformation(): void {
-		this.log.info('updating infos...');
-		try {
-			const url = `http://${this.config.ip}/PRESENTATION/HTML/TOP/PRTINFO.HTML`;
-			fetch
-				.default(url)
-				.then((res) => {
-					if (res.ok) {
-						return res.text();
-					} else {
-						throw Error(res.statusText);
-					}
-				})
-				.then(async (htmlBody: string) => {
-					await this.updatePrinterInfo(htmlBody);
-					await this.updateInkCartridgeInfo(htmlBody);
-					await this.setStateAsync('info.connection', true, true);
-					this.log.info('updating infos successfull');
-				});
-		} catch (e) {
-			this.setState('info.connection', false, true);
-			this.log.error(e);
 		}
 	}
 }

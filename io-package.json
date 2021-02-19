@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"news": {
+			"1.0.2": {
+				"en": "changed adapter mode to schedule",
+				"de": "Adaptermodus auf Zeitplan geändert",
+				"ru": "изменил режим адаптера на расписание",
+				"pt": "mudou o modo do adaptador para agendar",
+				"nl": "veranderde adaptermodus om te plannen",
+				"fr": "changement de mode d'adaptateur pour planifier",
+				"it": "cambiato la modalità dell'adattatore in pianificazione",
+				"es": "cambio de modo de adaptador para programar",
+				"pl": "zmieniono tryb adaptera na harmonogram",
+				"zh-cn": "将适配器模式更改为计划"
+			},
 			"1.0.1": {
 				"en": "added support for further languages",
 				"de": "Unterstützung für weitere Sprachen hinzugefügt",
@@ -47,7 +59,9 @@
 		"extIcon": "https://raw.githubusercontent.com/tikodu/ioBroker.epson_xp540/master/admin/epson_xp540.png",
 		"readme": "https://github.com/tikodu/ioBroker.epson_xp540/blob/master/README.md",
 		"loglevel": "info",
-		"mode": "daemon",
+		"mode": "schedule",
+		"schedule": "*/5 * * * *",
+		"allowInit": true,
 		"type": "infrastructure",
 		"compact": true,
 		"connectionType": "local",
@@ -64,27 +78,5 @@
 		"internvalInMinutes": "5"
 	},
 	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+	"instanceObjects": []
 }

@@ -5,7 +5,6 @@ declare global {
 	namespace ioBroker {
 		interface AdapterConfig {
 			ip: string;
-			internvalInMinutes: number;
 		}
 	}
 }
