@@ -1,9 +1,9 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.3",
+		"version": "1.0.4",
 		"news": {
-			"1.0.3": {
+			"1.0.4": {
 				"en": "Bug fix",
 				"de": "Fehlerbehebung",
 				"ru": "Исправлена ошибка",
@@ -73,7 +73,7 @@
 		"loglevel": "info",
 		"mode": "schedule",
 		"schedule": "*/5 * * * *",
-		"allowInit": true,
+		"allowInit": false,
 		"type": "infrastructure",
 		"compact": true,
 		"connectionType": "local",

@@ -57,18 +57,18 @@ class EpsonXp540 extends utils.Adapter {
                     await this.updatePrinterInfo(htmlBody);
                     await this.updateInkCartridgeInfo(htmlBody);
                     this.log.info('All data handled.');
-                    this.stopWithTimeout();
+                    this.stopAdapter();
                 });
             }
             catch (e) {
                 this.log.info('An error occurred while retrieving or handling the data.');
                 this.log.error(JSON.stringify(e));
-                this.stopWithTimeout(true);
+                this.stopAdapter(true);
             }
         }
         else {
             this.log.warn('Data cannot be retrieved. Please configure a valid IP or hostname.');
-            this.stopWithTimeout(true);
+            this.stopAdapter(true);
         }
     }
     /**
@@ -76,21 +76,16 @@ class EpsonXp540 extends utils.Adapter {
      */
     onUnload(callback) {
         try {
-            if (this._timeout) {
-                clearTimeout(this._timeout);
-            }
             callback();
         }
         catch (e) {
             callback();
         }
     }
-    stopWithTimeout(withError = false) {
-        this._timeout = setTimeout(() => {
-            this.terminate
-                ? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
-                : process.exit(0);
-        }, 1000 * 10);
+    stopAdapter(withError = false) {
+        this.terminate
+            ? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
+            : process.exit(0);
     }
     replaceAll(base, search, replace) {
         return base.split(search).join(replace);
