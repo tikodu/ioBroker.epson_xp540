@@ -6,7 +6,6 @@ import * as utils from '@iobroker/adapter-core';
 import * as fetch from 'node-fetch';
 
 class EpsonXp540 extends utils.Adapter {
-
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
 			...options,
@@ -64,8 +63,8 @@ class EpsonXp540 extends utils.Adapter {
 
 	private stopAdapter(withError = false): void {
 		this.terminate
-		? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
-		: process.exit(0);
+			? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
+			: process.exit(0);
 	}
 
 	private replaceAll(base: string, search: string, replace: string): string {
