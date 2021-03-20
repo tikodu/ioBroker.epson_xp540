@@ -19,7 +19,7 @@ Periodically retrieves the status information and cartridge level of an EPSON XP
 
 ## Changelog
 
-### 1.0.3 (2021-02-19)
+### 1.0.4 (2021-03-20)
 
 -   (tikodu) bug fix
 
