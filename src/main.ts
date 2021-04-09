@@ -6,7 +6,6 @@ import * as utils from '@iobroker/adapter-core';
 import * as fetch from 'node-fetch';
 
 class EpsonXp540 extends utils.Adapter {
-	private _timeout: NodeJS.Timeout | undefined;
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -39,16 +38,16 @@ class EpsonXp540 extends utils.Adapter {
 						await this.updatePrinterInfo(htmlBody);
 						await this.updateInkCartridgeInfo(htmlBody);
 						this.log.info('All data handled.');
-						this.stopWithTimeout();
+						this.stopAdapter();
 					});
 			} catch (e) {
 				this.log.info('An error occurred while retrieving or handling the data.');
 				this.log.error(JSON.stringify(e));
-				this.stopWithTimeout(true);
+				this.stopAdapter(true);
 			}
 		} else {
 			this.log.warn('Data cannot be retrieved. Please configure a valid IP or hostname.');
-			this.stopWithTimeout(true);
+			this.stopAdapter(true);
 		}
 	}
 
@@ -57,21 +56,16 @@ class EpsonXp540 extends utils.Adapter {
 	 */
 	private onUnload(callback: () => void): void {
 		try {
-			if (this._timeout) {
-				clearTimeout(this._timeout);
-			}
 			callback();
 		} catch (e) {
 			callback();
 		}
 	}
 
-	private stopWithTimeout(withError = false): void {
-		this._timeout = setTimeout(() => {
-			this.terminate
-				? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
-				: process.exit(0);
-		}, 1000 * 10);
+	private stopAdapter(withError = false): void {
+		this.terminate
+		? this.terminate('Adapter stopped until next schedule moment.', withError ? 1 : 0)
+		: process.exit(0);
 	}
 
 	private replaceAll(base: string, search: string, replace: string): string {
