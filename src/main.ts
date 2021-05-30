@@ -55,8 +55,14 @@ class EpsonXp540 extends utils.Adapter {
 	}
 
 	private handleFetchError(e: any): void {
-		this.log.info('An error occurred while retrieving or handling the data.');
-		this.log.error(JSON.stringify(e));
+		if (e && e.code && e.code == 'ETIMEDOUT') {
+			this.log.warn(
+				'Timeout during connection setup. Please check the IP or hostname and switch on the printer.',
+			);
+		} else {
+			this.log.info('An error occurred while retrieving or handling the data.');
+			this.log.error(JSON.stringify(e));
+		}
 		this.stopAdapter(true);
 	}
 
