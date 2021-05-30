@@ -23,25 +23,17 @@ class EpsonXp540 extends utils.Adapter {
 		if (this.config?.ip !== null && this.config?.ip !== undefined && this.config.ip !== '') {
 			try {
 				const url = `http://${this.config.ip}/PRESENTATION/HTML/TOP/PRTINFO.HTML`;
-				fetch
-					.default(url)
-					.then((res) => {
-						if (res.ok) {
-							return res.text();
-						} else {
-							throw Error(res.statusText);
-						}
-					})
-					.then(async (htmlBody: string) => {
-						this.log.info('Data has been received. Try to handle data...');
-						await this.updatePrinterInfo(htmlBody);
-						await this.updateInkCartridgeInfo(htmlBody);
-						this.log.info('All data handled.');
-						this.stopAdapter();
-					})
-					.catch((e) => {
-						this.handleFetchError(e);
-					});
+				const response = await fetch.default(url);
+				if (response.ok) {
+					this.log.info('Data has been received. Try to handle data...');
+					const htmlBody = await response.text();
+					await this.updatePrinterInfo(htmlBody);
+					await this.updateInkCartridgeInfo(htmlBody);
+					this.log.info('All data handled.');
+					this.stopAdapter();
+				} else {
+					this.log.warn(`Response has status ${response.status} - ${response.statusText}`);
+				}
 			} catch (e) {
 				this.handleFetchError(e);
 			}
