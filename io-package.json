@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.4",
+		"version": "1.0.5",
 		"news": {
+			"1.0.5": {
+				"en": "Bug fix & dependency updates",
+				"de": "Fehlerbehebung und Abhängigkeitsaktualisierungen",
+				"ru": "Исправление ошибок и обновления зависимостей",
+				"pt": "Correção de bug e atualizações de dependência",
+				"nl": "Bugfix en afhankelijkheidsupdates",
+				"fr": "Correction de bogues et mises à jour des dépendances",
+				"it": "Correzione di bug e aggiornamenti delle dipendenze",
+				"es": "Corrección de errores y actualizaciones de dependencia",
+				"pl": "Naprawa błędów i aktualizacje zależności",
+				"zh-cn": "错误修复和依赖关系更新"
+			},
 			"1.0.4": {
 				"en": "Bug fix",
 				"de": "Fehlerbehebung",

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.epson_xp540",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Periodically retrieves the status information and ink cartridge level of an EPSON XP-540 printer",
   "author": {
     "name": "tikodu",
