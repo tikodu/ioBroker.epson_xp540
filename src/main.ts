@@ -38,11 +38,12 @@ class EpsonXp540 extends utils.Adapter {
 						await this.updateInkCartridgeInfo(htmlBody);
 						this.log.info('All data handled.');
 						this.stopAdapter();
+					})
+					.catch((e) => {
+						this.handleFetchError(e);
 					});
 			} catch (e) {
-				this.log.info('An error occurred while retrieving or handling the data.');
-				this.log.error(JSON.stringify(e));
-				this.stopAdapter(true);
+				this.handleFetchError(e);
 			}
 		} else {
 			this.log.warn('Data cannot be retrieved. Please configure a valid IP or hostname.');
@@ -59,6 +60,12 @@ class EpsonXp540 extends utils.Adapter {
 		} catch (e) {
 			callback();
 		}
+	}
+
+	private handleFetchError(e: any): void {
+		this.log.info('An error occurred while retrieving or handling the data.');
+		this.log.error(JSON.stringify(e));
+		this.stopAdapter(true);
 	}
 
 	private stopAdapter(withError = false): void {
