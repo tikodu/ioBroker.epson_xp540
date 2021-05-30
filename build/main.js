@@ -42,28 +42,21 @@ class EpsonXp540 extends utils.Adapter {
         if (((_a = this.config) === null || _a === void 0 ? void 0 : _a.ip) !== null && ((_b = this.config) === null || _b === void 0 ? void 0 : _b.ip) !== undefined && this.config.ip !== '') {
             try {
                 const url = `http://${this.config.ip}/PRESENTATION/HTML/TOP/PRTINFO.HTML`;
-                fetch
-                    .default(url)
-                    .then((res) => {
-                    if (res.ok) {
-                        return res.text();
-                    }
-                    else {
-                        throw Error(res.statusText);
-                    }
-                })
-                    .then(async (htmlBody) => {
+                const response = await fetch.default(url);
+                if (response.ok) {
                     this.log.info('Data has been received. Try to handle data...');
+                    const htmlBody = await response.text();
                     await this.updatePrinterInfo(htmlBody);
                     await this.updateInkCartridgeInfo(htmlBody);
                     this.log.info('All data handled.');
                     this.stopAdapter();
-                });
+                }
+                else {
+                    this.log.warn(`Response has status ${response.status} - ${response.statusText}`);
+                }
             }
             catch (e) {
-                this.log.info('An error occurred while retrieving or handling the data.');
-                this.log.error(JSON.stringify(e));
-                this.stopAdapter(true);
+                this.handleFetchError(e);
             }
         }
         else {
@@ -81,6 +74,16 @@ class EpsonXp540 extends utils.Adapter {
         catch (e) {
             callback();
         }
+    }
+    handleFetchError(e) {
+        if (e && e.code && e.code == 'ETIMEDOUT') {
+            this.log.warn('Timeout during connection setup. Please check the IP or hostname and switch on the printer.');
+        }
+        else {
+            this.log.info('An error occurred while retrieving or handling the data.');
+            this.log.error(JSON.stringify(e));
+        }
+        this.stopAdapter(true);
     }
     stopAdapter(withError = false) {
         this.terminate

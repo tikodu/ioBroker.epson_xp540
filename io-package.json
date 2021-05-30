@@ -1,9 +1,9 @@
 {
 	"common": {
 		"name": "epson_xp540",
-		"version": "1.0.5",
+		"version": "1.0.6",
 		"news": {
-			"1.0.5": {
+			"1.0.6": {
 				"en": "Bug fix & dependency updates",
 				"de": "Fehlerbehebung und Abhängigkeitsaktualisierungen",
 				"ru": "Исправление ошибок и обновления зависимостей",
